@@ -42,6 +42,11 @@ public class TMetpQcLine implements Serializable {
     @ApiModelProperty(value = "质控界限名称")
     private String ruleName;
 
+    /** 要素类别(气温/气压/湿度/风向风速/降水/能见度,各归各排) */
+    @TableField("elem_type")
+    @ApiModelProperty(value = "要素类别(气温/气压/湿度/风向风速/降水/能见度,各归各排)")
+    private String elemType;
+
     /** 一档要素偏差封顶值 */
     @TableField("th1_max")
     @ApiModelProperty(value = "一档要素偏差封顶值")
@@ -133,6 +138,14 @@ public class TMetpQcLine implements Serializable {
 
     public void setRuleName(String ruleName) {
         this.ruleName = ruleName;
+    }
+
+    public String getElemType() {
+        return elemType;
+    }
+
+    public void setElemType(String elemType) {
+        this.elemType = elemType;
     }
 
     public BigDecimal getTh1Max() {

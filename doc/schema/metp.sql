@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS t_metp_qc_line (
   id bigint NOT NULL COMMENT '主键',
   rule_code varchar(64) DEFAULT NULL COMMENT '观测质控界限代号',
   rule_name varchar(128) DEFAULT NULL COMMENT '质控界限名称',
+  elem_type varchar(32) DEFAULT NULL COMMENT '要素类别(气温/气压/湿度/风向风速/降水/能见度,各归各排)',
   th1_max decimal(12,2) DEFAULT NULL COMMENT '一档要素偏差封顶值',
   th2_max decimal(12,2) DEFAULT NULL COMMENT '二档要素偏差封顶值',
   th3_max decimal(12,2) DEFAULT NULL COMMENT '三档要素偏差封顶值',
@@ -130,3 +131,18 @@ INSERT IGNORE INTO t_metp_stn_doc (id, site_no, site_name, site_type, road_name,
 VALUES (0, 'TQ00', '江南省临川国家基本气象站基础档案', '国家基本气象站', '江南省—临川市—城东区', 12.00, 40.00, 120.00, 0, 0, 'seed', NOW()),
        (1, 'TQ01', '旧临川市西郊气象观测站基础档案（已停测）', '一般气象站', '江南省—临川市—城西区', 12.00, 40.00, 120.00, 1, 0, 'seed', NOW());
 
+
+-- ---- 存量库迁移：t_metp_qc_line 补 elem_type（已存在则跳过，可重复执行）----
+SET @dbname = DATABASE();
+SET @tablename = 't_metp_qc_line';
+SET @columnname = 'elem_type';
+SET @preparedStatement = (SELECT IF(
+  (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+     WHERE TABLE_SCHEMA = @dbname AND TABLE_NAME = @tablename AND COLUMN_NAME = @columnname) > 0,
+  'SELECT 1',
+  CONCAT('ALTER TABLE `', @tablename, '` ADD COLUMN `', @columnname,
+         '` varchar(32) DEFAULT NULL COMMENT ''要素类别(气温/气压/湿度/风向风速/降水/能见度,各归各排)'' AFTER `rule_name`;')
+));
+PREPARE stmt FROM @preparedStatement;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
